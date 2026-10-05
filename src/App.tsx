@@ -15,6 +15,7 @@ import {
   resolveSpeciesTypes,
 } from './lib/dexResolver'
 import { parseShowdownTeam, validateShowdownTeamText } from './lib/showdownParser'
+import { getTypeEffectiveness } from './lib/typeChart'
 
 const styles = new Proxy({} as Record<string, string>, {
   get: (_, property: string | symbol) => String(property),
@@ -176,6 +177,44 @@ function App() {
 
     return row.superEffectiveDetails.find((entry) => entry.type === activeTypeTooltip.type) ?? null
   }, [activeTypeTooltip, analysis.synergyPairs])
+
+  const superWeaknesses = useMemo(
+    () =>
+      POKEMON_TYPES.map((attackType) => {
+        const members = team
+          .map((member, index) => ({
+            name: member.species || `Slot ${index + 1}`,
+            weakTypeCount: member.types.filter(
+              (defendType) => getTypeEffectiveness(attackType, [defendType]) > 1,
+            ).length,
+          }))
+          .filter((entry) => entry.weakTypeCount >= 2)
+          .map((entry) => entry.name)
+
+        if (members.length === 0) {
+          return null
+        }
+
+        return {
+          type: attackType,
+          count: members.length,
+          members,
+        }
+      }).filter((entry): entry is { type: PokemonType; count: number; members: string[] } => Boolean(entry)),
+    [team],
+  )
+
+  const immuneSummary = useMemo(
+    () =>
+      analysis.defensiveByType
+        .filter((row) => row.immune > 0)
+        .map((row) => ({
+          type: row.type,
+          count: row.immune,
+          members: row.immuneMembers,
+        })),
+    [analysis.defensiveByType],
+  )
 
   const synergyByPokemon = useMemo(() => {
     const pairsWithIndex = analysis.synergyPairs.map((pair, pairIndex) => ({
@@ -849,7 +888,7 @@ function App() {
               </ul>
             ) : null}
 
-            <div className={styles.summary}>
+            {/* <div className={styles.summary}>
               <div>
                 <h3>Debilidades</h3>
                 <ul className={styles.summaryTypeList}>
@@ -916,12 +955,95 @@ function App() {
                 </ul>
               </div>
               <div>
+                <h3>Inmunes</h3>
+                <ul className={styles.summaryTypeList}>
+                  {immuneSummary.length > 0 ? (
+                    immuneSummary.map((entry) => (
+                      <li key={`immune-${entry.type}`}>
+                        <strong>
+                          {entry.type}: {entry.count}
+                        </strong>
+                        <div className={styles.pokemonChipList}>
+                          {entry.members.map((species) => (
+                            <span key={`immune-chip-${entry.type}-${species}`} className={styles.pokemonChip}>
+                              {getPokemonSprite(team, species) ? (
+                                <img
+                                  src={getPokemonSprite(team, species) ?? ''}
+                                  alt={species}
+                                  className={styles.pokemonChipSprite}
+                                />
+                              ) : (
+                                <span className={styles.pokemonChipPlaceholder}>?</span>
+                              )}
+                              <span>{species}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </li>
+                    ))
+                  ) : (
+                    <li>
+                      <strong>-</strong>
+                    </li>
+                  )}
+                </ul>
+              </div>
+              <div>
                 <h3>Tipos sin cobertura supereficaz</h3>
                 <p>{analysis.uncoveredTypes.join(', ') || '-'}</p>
                 <h3>Tipos cubiertos supereficaz</h3>
                 <p>{analysis.coveredTypes.join(', ') || '-'}</p>
               </div>
             </div>
+
+            <div className={styles.tableWrap}>
+              <h3>Super debilidades</h3>
+              <div className={styles.dataTable}>
+                <div className={styles.dataHeaderRow}>
+                  <div>Tipo de ataque</div>
+                  <div>Detalle (x4 y arriba)</div>
+                </div>
+
+                {superWeaknesses.length > 0 ? (
+                  superWeaknesses.map((row) => (
+                    <div key={`super-weak-${row.type}`} className={styles.dataRow}>
+                      <div className={styles.dataLabel}>{row.type}</div>
+
+                      <div className={styles.dataValue}>
+                        {row.members.length > 0 ? (
+                          <div className={styles.pokemonChipList}>
+                            {row.members.map((species) => {
+                              const spriteUrl = getPokemonSprite(team, species)
+                              return (
+                                <span key={`super-weak-${row.type}-${species}`} className={styles.pokemonChip}>
+                                  {spriteUrl ? (
+                                    <img
+                                      src={spriteUrl}
+                                      alt={species}
+                                      className={styles.pokemonChipSprite}
+                                    />
+                                  ) : (
+                                    <span className={styles.pokemonChipPlaceholder}>?</span>
+                                  )}
+                                  <span>{species}</span>
+                                </span>
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <span>-</span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.dataRow}>
+                    <div className={styles.dataLabel}>-</div>
+                    <div className={styles.dataValue}>No hay super debilidades activas.</div>
+                  </div>
+                )}
+              </div>
+            </div>*/}
 
             <div className={styles.recommendations}>
               <h3>Recomendaciones automaticas</h3>
