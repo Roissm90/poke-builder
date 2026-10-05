@@ -1068,7 +1068,7 @@ function App() {
                   </div>
                 )}
               </div>
-            </div>*/}
+            </div>
 
             <div className={styles.recommendations}>
               <h3>Recomendaciones automaticas</h3>
@@ -1094,7 +1094,7 @@ function App() {
               ) : (
                 <p>No hay reglas de objeto especiales activas en el equipo actual.</p>
               )}
-            </div>
+            </div>*/}
 
             <div className={styles.tableWrap}>
               <h3>Defensa por tipo</h3>
