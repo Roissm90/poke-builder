@@ -342,6 +342,7 @@ export function analyzeTeam(
     const resistMembers: string[] = []
     const immuneMembers: string[] = []
     const neutralMembers: string[] = []
+    const x4Members: string[] = []
 
     for (const [index, member] of team.entries()) {
       const memberName = member.species || `Slot ${index + 1}`
@@ -352,6 +353,9 @@ export function analyzeTeam(
       } else if (mult > 1) {
         weak += 1
         weakMembers.push(memberName)
+        if (mult >= 4) {
+          x4Members.push(memberName)
+        }
       } else if (mult < 1) {
         resist += 1
         resistMembers.push(memberName)
@@ -371,6 +375,7 @@ export function analyzeTeam(
       resistMembers,
       immuneMembers,
       neutralMembers,
+      x4Members,
     }
   })
 

@@ -15,7 +15,6 @@ import {
   resolveSpeciesTypes,
 } from './lib/dexResolver'
 import { parseShowdownTeam, validateShowdownTeamText } from './lib/showdownParser'
-import { getTypeEffectiveness } from './lib/typeChart'
 
 const styles = new Proxy({} as Record<string, string>, {
   get: (_, property: string | symbol) => String(property),
@@ -25,6 +24,13 @@ const OFFICIAL_MOVE_OPTIONS = Dex.moves
   .all()
   .filter((move) => move.exists)
   .sort((a, b) => a.name.localeCompare(b.name))
+
+const OFFICIAL_ABILITY_OPTIONS = Dex.abilities
+  .all()
+  .filter((ability) => ability.exists)
+  .map((ability) => ability.name)
+  .filter((name) => Boolean(name))
+  .sort((a, b) => a.localeCompare(b))
 
 const OFFICIAL_POKEMON_OPTIONS = Dex.species
   .all()
@@ -103,6 +109,7 @@ function App() {
   const [activeTypeTooltip, setActiveTypeTooltip] = useState<TypeTooltipState | null>(null)
   const [expandedSynergyPokemon, setExpandedSynergyPokemon] = useState<string[]>([])
   const [pokemonSearches, setPokemonSearches] = useState<Record<string, string>>({})
+  const [abilitySearches, setAbilitySearches] = useState<Record<string, string>>({})
   const [moveSearches, setMoveSearches] = useState<Record<string, string>>({})
 
   const analysis = useMemo(() => analyzeTeam(team), [team])
@@ -177,44 +184,6 @@ function App() {
 
     return row.superEffectiveDetails.find((entry) => entry.type === activeTypeTooltip.type) ?? null
   }, [activeTypeTooltip, analysis.synergyPairs])
-
-  const superWeaknesses = useMemo(
-    () =>
-      POKEMON_TYPES.map((attackType) => {
-        const members = team
-          .map((member, index) => ({
-            name: member.species || `Slot ${index + 1}`,
-            weakTypeCount: member.types.filter(
-              (defendType) => getTypeEffectiveness(attackType, [defendType]) > 1,
-            ).length,
-          }))
-          .filter((entry) => entry.weakTypeCount >= 2)
-          .map((entry) => entry.name)
-
-        if (members.length === 0) {
-          return null
-        }
-
-        return {
-          type: attackType,
-          count: members.length,
-          members,
-        }
-      }).filter((entry): entry is { type: PokemonType; count: number; members: string[] } => Boolean(entry)),
-    [team],
-  )
-
-  const immuneSummary = useMemo(
-    () =>
-      analysis.defensiveByType
-        .filter((row) => row.immune > 0)
-        .map((row) => ({
-          type: row.type,
-          count: row.immune,
-          members: row.immuneMembers,
-        })),
-    [analysis.defensiveByType],
-  )
 
   const synergyByPokemon = useMemo(() => {
     const pairsWithIndex = analysis.synergyPairs.map((pair, pairIndex) => ({
@@ -698,18 +667,74 @@ function App() {
                     </label>
                     <label>
                       Habilidad
-                      <input
-                        value={editingMember.ability}
-                        readOnly={editingMember.source === 'showdown'}
-                        onChange={(event) => {
-                          if (editingMember.source !== 'manual') {
-                            return
-                          }
+                      <div className={styles.moveInputWrap}>
+                        <input
+                          value={abilitySearches[editingMember.id] ?? editingMember.ability}
+                          readOnly={editingMember.source === 'showdown'}
+                          onFocus={() => {
+                            if (editingMember.source !== 'manual') {
+                              return
+                            }
 
-                          updateMember(editingMember.id, { ability: event.target.value })
-                        }}
-                        placeholder="libre"
-                      />
+                            if (!(editingMember.id in abilitySearches)) {
+                              setAbilitySearches((current) => ({
+                                ...current,
+                                [editingMember.id]: editingMember.ability,
+                              }))
+                            }
+                          }}
+                          onChange={(event) => {
+                            if (editingMember.source !== 'manual') {
+                              return
+                            }
+
+                            const nextValue = event.target.value
+                            setAbilitySearches((current) => ({
+                              ...current,
+                              [editingMember.id]: nextValue,
+                            }))
+                            updateMember(editingMember.id, { ability: nextValue })
+                          }}
+                          placeholder="ej. Lightning Rod"
+                        />
+                        {editingMember.source === 'manual' &&
+                          abilitySearches[editingMember.id] !== undefined && (
+                            <div className={styles.moveSuggestionList}>
+                              {OFFICIAL_ABILITY_OPTIONS.filter((entry) =>
+                                entry.toLowerCase().includes(
+                                  (abilitySearches[editingMember.id] ?? '').trim().toLowerCase(),
+                                ),
+                              ).slice(0, 20).length > 0 ? (
+                                OFFICIAL_ABILITY_OPTIONS.filter((entry) =>
+                                  entry.toLowerCase().includes(
+                                    (abilitySearches[editingMember.id] ?? '').trim().toLowerCase(),
+                                  ),
+                                )
+                                  .slice(0, 20)
+                                  .map((entry) => (
+                                    <button
+                                      key={`ability-${editingMember.id}-${entry}`}
+                                      type="button"
+                                      className={styles.moveSuggestion}
+                                      onMouseDown={(event) => {
+                                        event.preventDefault()
+                                        setAbilitySearches((current) => {
+                                          const next = { ...current }
+                                          delete next[editingMember.id]
+                                          return next
+                                        })
+                                        updateMember(editingMember.id, { ability: entry })
+                                      }}
+                                    >
+                                      {entry}
+                                    </button>
+                                  ))
+                              ) : (
+                                <div className={styles.moveSuggestionEmpty}>No hay resultados</div>
+                              )}
+                            </div>
+                          )}
+                      </div>
                     </label>
                   </div>
 
@@ -1084,6 +1109,33 @@ function App() {
                     <div className={styles.dataLabel}>{row.type}</div>
 
                     <div className={styles.dataValue}>
+                      <div className={styles.detailRow}>
+                        <strong>x4:</strong>
+                        {row.x4Members.length > 0 ? (
+                          <div className={styles.pokemonChipList}>
+                            {row.x4Members.map((species) => {
+                              const spriteUrl = getPokemonSprite(team, species)
+                              return (
+                                <span key={`def-x4-${row.type}-${species}`} className={styles.pokemonChip}>
+                                  {spriteUrl ? (
+                                    <img
+                                      src={spriteUrl}
+                                      alt={species}
+                                      className={styles.pokemonChipSprite}
+                                    />
+                                  ) : (
+                                    <span className={styles.pokemonChipPlaceholder}>?</span>
+                                  )}
+                                  <span>{species}</span>
+                                </span>
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <span>-</span>
+                        )}
+                      </div>
+
                       <div className={styles.detailRow}>
                         <strong>Debiles:</strong>
                         {row.weakMembers.length > 0 ? (

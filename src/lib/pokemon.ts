@@ -54,6 +54,7 @@ export type TeamAnalysis = {
     resistMembers: string[]
     immuneMembers: string[]
     neutralMembers: string[]
+    x4Members: string[]
   }>
   biggestWeaknesses: Array<{ type: PokemonType; count: number }>
   strongestResists: Array<{ type: PokemonType; count: number }>
