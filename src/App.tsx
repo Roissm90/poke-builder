@@ -1,3 +1,4 @@
+import { Dex } from '@pkmn/dex'
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import './App.scss'
 import { analyzeTeam } from './lib/analyzer'
@@ -19,6 +20,17 @@ const styles = new Proxy({} as Record<string, string>, {
   get: (_, property: string | symbol) => String(property),
 }) as Record<string, string>
 
+const OFFICIAL_MOVE_OPTIONS = Dex.moves
+  .all()
+  .filter((move) => move.exists)
+  .sort((a, b) => a.name.localeCompare(b.name))
+
+const OFFICIAL_POKEMON_OPTIONS = Dex.species
+  .all()
+  .map((species) => species.name)
+  .filter((name) => Boolean(name))
+  .sort((a, b) => a.localeCompare(b))
+
 const SHOWDOWN_SESSION_KEY = 'poke-builder-showdown-text'
 
 function createEmptyMember(): TeamMember {
@@ -36,6 +48,7 @@ function createEmptyMember(): TeamMember {
       { name: '', type: null, category: null },
       { name: '', type: null, category: null },
     ],
+    source: 'manual',
   }
 }
 
@@ -88,6 +101,8 @@ function App() {
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
   const [activeTypeTooltip, setActiveTypeTooltip] = useState<TypeTooltipState | null>(null)
   const [expandedSynergyPokemon, setExpandedSynergyPokemon] = useState<string[]>([])
+  const [pokemonSearches, setPokemonSearches] = useState<Record<string, string>>({})
+  const [moveSearches, setMoveSearches] = useState<Record<string, string>>({})
 
   const analysis = useMemo(() => analyzeTeam(team), [team])
   const editingMember = useMemo(
@@ -205,7 +220,12 @@ function App() {
       }
 
       const parsed = parseShowdownTeam(trimmed)
-      setTeam(enrichTeamWithDex(parsed))
+      setTeam(
+        enrichTeamWithDex(parsed).map((member) => ({
+          ...member,
+          source: 'showdown' as const,
+        })),
+      )
       setError('')
     }, 250)
 
@@ -440,6 +460,17 @@ function App() {
                   </p>
                 </article>
               ))}
+
+              {team.length < 6 ? (
+                <button
+                  type="button"
+                  className={styles.addTeamCard}
+                  onClick={addManualMember}
+                  aria-label="Añadir Pokémon manualmente"
+                >
+                  <span className={styles.addTeamCardPlus}>+</span>
+                </button>
+              ) : null}
             </div>
           </section>
 
@@ -463,18 +494,113 @@ function App() {
                 <div className={styles.memberCard}>
                   <label>
                     Pokemon
-                    <input
-                      value={editingMember.species}
-                      onChange={(event) => {
-                        const nextSpecies = event.target.value
-                        updateMember(editingMember.id, {
-                          species: nextSpecies,
-                          spriteUrl: null,
-                          types: resolveSpeciesTypes(nextSpecies),
-                        })
-                      }}
-                      placeholder="ej. Garchomp"
-                    />
+                    <div className={styles.moveInputWrap}>
+                      <input
+                        className={styles.moveNameInput}
+                        value={
+                          pokemonSearches[editingMember.id] !== undefined
+                            ? pokemonSearches[editingMember.id]
+                            : editingMember.species
+                        }
+                        readOnly={editingMember.source === 'showdown'}
+                        onFocus={() => {
+                          if (editingMember.source === 'showdown') {
+                            return
+                          }
+
+                          setPokemonSearches((current) => ({
+                            ...current,
+                            [editingMember.id]: editingMember.species,
+                          }))
+                        }}
+                        onBlur={() => {
+                          if (editingMember.source === 'showdown') {
+                            return
+                          }
+
+                          setPokemonSearches((current) => {
+                            const next = { ...current }
+                            delete next[editingMember.id]
+                            return next
+                          })
+                        }}
+                        onChange={(event) => {
+                          if (editingMember.source !== 'manual') {
+                            return
+                          }
+
+                          const nextValue = event.target.value
+                          setPokemonSearches((current) => ({
+                            ...current,
+                            [editingMember.id]: nextValue,
+                          }))
+
+                          const matchingPokemon = OFFICIAL_POKEMON_OPTIONS.find(
+                            (entry) =>
+                              entry.toLowerCase() === nextValue.trim().toLowerCase(),
+                          )
+
+                          if (!nextValue.trim()) {
+                            updateMember(editingMember.id, {
+                              species: '',
+                              spriteUrl: null,
+                              types: [],
+                            })
+                            return
+                          }
+
+                          if (matchingPokemon) {
+                            updateMember(editingMember.id, {
+                              species: matchingPokemon,
+                              spriteUrl: null,
+                              types: resolveSpeciesTypes(matchingPokemon),
+                            })
+                          }
+                        }}
+                        placeholder="ej. Garchomp"
+                      />
+                      {pokemonSearches[editingMember.id] &&
+                        pokemonSearches[editingMember.id].trim() && (
+                          <div className={styles.moveSuggestionList}>
+                            {OFFICIAL_POKEMON_OPTIONS.filter((entry) =>
+                              entry.toLowerCase().includes(
+                                pokemonSearches[editingMember.id].trim().toLowerCase(),
+                              ),
+                            ).slice(0, 20).length > 0 ? (
+                              OFFICIAL_POKEMON_OPTIONS.filter((entry) =>
+                                entry.toLowerCase().includes(
+                                  pokemonSearches[editingMember.id].trim().toLowerCase(),
+                                ),
+                              )
+                                .slice(0, 20)
+                                .map((entry) => (
+                                  <button
+                                    key={`pokemon-${editingMember.id}-${entry}`}
+                                    type="button"
+                                    className={styles.moveSuggestion}
+                                    onMouseDown={(event) => {
+                                      event.preventDefault()
+                                      setPokemonSearches((current) => {
+                                        const next = { ...current }
+                                        delete next[editingMember.id]
+                                        return next
+                                      })
+                                      updateMember(editingMember.id, {
+                                        species: entry,
+                                        spriteUrl: null,
+                                        types: resolveSpeciesTypes(entry),
+                                      })
+                                    }}
+                                  >
+                                    {entry}
+                                  </button>
+                                ))
+                            ) : (
+                              <div className={styles.moveSuggestionEmpty}>No hay resultados</div>
+                            )}
+                          </div>
+                        )}
+                    </div>
                   </label>
 
                   <div className={styles.twoCols}>
@@ -482,6 +608,7 @@ function App() {
                       Tipo 1
                       <select
                         value={editingMember.types[0] ?? ''}
+                        disabled={editingMember.source === 'showdown'}
                         onChange={(event) =>
                           updateTypes(editingMember.id, 0, event.target.value)
                         }
@@ -499,6 +626,7 @@ function App() {
                       Tipo 2
                       <select
                         value={editingMember.types[1] ?? ''}
+                        disabled={editingMember.source === 'showdown'}
                         onChange={(event) =>
                           updateTypes(editingMember.id, 1, event.target.value)
                         }
@@ -518,9 +646,14 @@ function App() {
                       Objeto
                       <input
                         value={editingMember.item}
-                        onChange={(event) =>
+                        readOnly={editingMember.source === 'showdown'}
+                        onChange={(event) => {
+                          if (editingMember.source !== 'manual') {
+                            return
+                          }
+
                           updateMember(editingMember.id, { item: event.target.value })
-                        }
+                        }}
                         placeholder="libre"
                       />
                     </label>
@@ -528,9 +661,14 @@ function App() {
                       Habilidad
                       <input
                         value={editingMember.ability}
-                        onChange={(event) =>
+                        readOnly={editingMember.source === 'showdown'}
+                        onChange={(event) => {
+                          if (editingMember.source !== 'manual') {
+                            return
+                          }
+
                           updateMember(editingMember.id, { ability: event.target.value })
-                        }
+                        }}
                         placeholder="libre"
                       />
                     </label>
@@ -540,56 +678,149 @@ function App() {
                     Naturaleza
                     <input
                       value={editingMember.nature}
-                      onChange={(event) =>
+                      readOnly={editingMember.source === 'showdown'}
+                      onChange={(event) => {
+                        if (editingMember.source !== 'manual') {
+                          return
+                        }
+
                         updateMember(editingMember.id, { nature: event.target.value })
-                      }
+                      }}
                       placeholder="libre"
                     />
                   </label>
 
                   <div className={styles.moves}>
-                    {editingMember.moves.map((move, moveIndex) => (
-                      <div
-                        key={`${editingMember.id}-move-${moveIndex}`}
-                        className={styles.twoCols}
-                      >
-                        <label>
-                          Move {moveIndex + 1}
-                          <input
-                            value={move.name}
-                            onChange={(event) =>
-                              updateMove(editingMember.id, moveIndex, {
-                                name: event.target.value,
-                                type: null,
-                                category: null,
-                              })
-                            }
-                            placeholder="ej. Earthquake"
-                          />
-                        </label>
-                        <label>
-                          Tipo move
-                          <select
-                            value={move.type ?? ''}
-                            onChange={(event) =>
-                              updateMove(editingMember.id, moveIndex, {
-                                type: (event.target.value || null) as PokemonType | null,
-                              })
-                            }
-                          >
-                            <option value="">auto/manual</option>
-                            {POKEMON_TYPES.map((type) => (
-                              <option
-                                key={`${editingMember.id}-${moveIndex}-${type}`}
-                                value={type}
-                              >
-                                {type}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                      </div>
-                    ))}
+                    {editingMember.moves.map((move, moveIndex) => {
+                      const moveKey = `${editingMember.id}-${moveIndex}`
+                      const resolvedMoveType = move.type ?? resolveMoveType(move.name) ?? null
+                      const rawSearchText = moveSearches[moveKey]
+                      const isEditing = rawSearchText !== undefined
+                      const searchText = rawSearchText ?? ''
+                      const displayedMoveName = isEditing ? searchText : move.name
+                      const filteredMoves = OFFICIAL_MOVE_OPTIONS.filter((entry) =>
+                        entry.name.toLowerCase().includes(searchText.trim().toLowerCase()),
+                      ).slice(0, 20)
+
+                      return (
+                        <div
+                          key={`${editingMember.id}-move-${moveIndex}`}
+                          className={styles.twoCols}
+                        >
+                          <label>
+                            Move {moveIndex + 1}
+                            <div className={styles.moveInputWrap}>
+                              <input
+                                className={styles.moveNameInput}
+                                value={displayedMoveName}
+                                onFocus={() => {
+                                  if (!isEditing) {
+                                    setMoveSearches((current) => ({
+                                      ...current,
+                                      [moveKey]: '',
+                                    }))
+                                  }
+                                }}
+                                onBlur={() => {
+                                  if (searchText.trim() === '') {
+                                    setMoveSearches((current) => {
+                                      const next = { ...current }
+                                      delete next[moveKey]
+                                      return next
+                                    })
+                                  }
+                                }}
+                                onChange={(event) => {
+                                  const nextValue = event.target.value
+                                  setMoveSearches((current) => ({
+                                    ...current,
+                                    [moveKey]: nextValue,
+                                  }))
+
+                                  if (!nextValue.trim()) {
+                                    updateMove(editingMember.id, moveIndex, {
+                                      name: '',
+                                      type: null,
+                                      category: null,
+                                    })
+                                    return
+                                  }
+
+                                  const matchingMove = OFFICIAL_MOVE_OPTIONS.find(
+                                    (entry) =>
+                                      entry.name.toLowerCase() === nextValue.trim().toLowerCase(),
+                                  )
+
+                                  if (matchingMove) {
+                                    const nextType = resolveMoveType(matchingMove.name)
+                                    const nextCategory = resolveMoveCategory(matchingMove.name)
+
+                                    setMoveSearches((current) => {
+                                      const next = { ...current }
+                                      delete next[moveKey]
+                                      return next
+                                    })
+
+                                    updateMove(editingMember.id, moveIndex, {
+                                      name: matchingMove.name,
+                                      type: nextType ?? null,
+                                      category: nextCategory ?? null,
+                                    })
+                                  }
+                                }}
+                                placeholder="Filtrar ataques..."
+                              />
+                              {searchText.trim() ? (
+                                <div className={styles.moveSuggestionList}>
+                                  {filteredMoves.length > 0 ? (
+                                    filteredMoves.map((entry) => (
+                                      <button
+                                        key={`${moveKey}-${entry.name}`}
+                                        type="button"
+                                        className={styles.moveSuggestion}
+                                        onMouseDown={(event) => {
+                                          event.preventDefault()
+                                          const nextType = resolveMoveType(entry.name)
+                                          const nextCategory = resolveMoveCategory(entry.name)
+
+                                          setMoveSearches((current) => {
+                                            const next = { ...current }
+                                            delete next[moveKey]
+                                            return next
+                                          })
+
+                                          updateMove(editingMember.id, moveIndex, {
+                                            name: entry.name,
+                                            type: nextType ?? move.type ?? null,
+                                            category: nextCategory ?? move.category ?? null,
+                                          })
+                                        }}
+                                      >
+                                        {entry.name}
+                                      </button>
+                                    ))
+                                  ) : (
+                                    <div className={styles.moveSuggestionEmpty}>
+                                      No hay resultados
+                                    </div>
+                                  )}
+                                </div>
+                              ) : null}
+                            </div>
+                          </label>
+                          <label>
+                            Tipo
+                            <input
+                              className={styles.moveTypeDisplay}
+                              value={resolvedMoveType ?? 'auto'}
+                              readOnly
+                              placeholder="auto"
+                              onFocus={(event) => event.currentTarget.blur()}
+                            />
+                          </label>
+                        </div>
+                      )
+                    })}
                   </div>
 
                   <div className={styles.modalActions}>

@@ -87,6 +87,7 @@ function buildMember(block: string, index: number): TeamMember | null {
     nature,
     types: [],
     moves,
+    source: 'showdown',
   }
 }
 

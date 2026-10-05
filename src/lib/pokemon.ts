@@ -29,6 +29,8 @@ export type MoveSlot = {
   category: MoveCategory | null
 }
 
+export type TeamMemberSource = 'manual' | 'showdown'
+
 export type TeamMember = {
   id: string
   species: string
@@ -38,6 +40,7 @@ export type TeamMember = {
   nature: string
   types: PokemonType[]
   moves: MoveSlot[]
+  source: TeamMemberSource
 }
 
 export type TeamAnalysis = {

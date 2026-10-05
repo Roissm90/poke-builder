@@ -209,6 +209,33 @@ strong {
   background: var(--danger);
 }
 
+.addTeamCard {
+  border: 1px dashed #3a5070;
+  border-radius: 14px;
+  background: rgba(12, 22, 35, 0.85);
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: #5a95ff;
+    box-shadow: 0 14px 26px rgba(3, 10, 24, 0.45);
+  }
+}
+
+.addTeamCardPlus {
+  font-size: clamp(3rem, 5vw, 5rem);
+  line-height: 1;
+  color: #7ea8ff;
+  font-weight: 700;
+}
+
 .spriteWrap {
   width: 92px;
   height: 92px;
@@ -254,6 +281,76 @@ strong {
     background: var(--input-bg);
     color: var(--text-main);
   }
+}
+
+.moveNameInput,
+.moveTypeDisplay,
+.readOnlyField {
+  width: 100%;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  color: var(--text-main);
+  font: inherit;
+  min-height: 42px;
+}
+
+.moveNameInput {
+  box-shadow: inset 0 0 0 1px rgba(139, 174, 255, 0.06);
+}
+
+.moveTypeDisplay,
+.readOnlyField {
+  background: rgba(14, 22, 37, 0.9);
+  color: #deebff;
+  cursor: default;
+  text-transform: capitalize;
+}
+
+.moveInputWrap {
+  position: relative;
+}
+
+.moveSuggestionList {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid #2a3d58;
+  border-radius: 10px;
+  background: #0b1421;
+  box-shadow: 0 18px 30px rgba(2, 8, 22, 0.35);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.moveSuggestion {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-main);
+  text-align: left;
+  padding: 8px 10px;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(47, 120, 255, 0.14);
+    outline: none;
+  }
+}
+
+.moveSuggestionEmpty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 8px 10px;
 }
 
 .modalOverlay {
@@ -348,7 +445,7 @@ strong {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
   text-transform: capitalize;
 
@@ -361,6 +458,12 @@ strong {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+  }
+}
+
+@media (min-width: 1024px) {
+  .summaryTypeList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -748,6 +851,11 @@ strong {
   .teamCards {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
+
+  .dataTable .dataRow:nth-child(odd),
+  .dataTableOffense .dataRow:nth-child(odd) {
+    border-left: 1px solid #2a3d58;
+  }
 }
 
 @media (max-width: 1023px) {
@@ -771,17 +879,37 @@ strong {
 @media (min-width: 760px) {
   .dataHeaderRow,
   .dataRow {
-    grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+    grid-template-columns: minmax(80px, 100px) minmax(0, 1fr);
   }
 
   .dataTableOffense {
     .dataHeaderRow,
     .dataRow {
-      grid-template-columns: minmax(120px, 180px) minmax(120px, 180px) minmax(
+      grid-template-columns: minmax(80px, 100px) minmax(60px, 80px) minmax(
           0,
           1fr
         );
     }
+  }
+}
+
+@media (min-width: 1024px) {
+  .dataTable {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dataHeaderRow,
+  .dataRow {
+    grid-template-columns: minmax(80px, 100px) minmax(0, 1fr);
+  }
+
+  .dataTableOffense {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dataTableOffense .dataHeaderRow,
+  .dataTableOffense .dataRow {
+    grid-template-columns: minmax(140px, 1fr) minmax(110px, 0.85fr) minmax(0, 2.2fr);
   }
 }
 
