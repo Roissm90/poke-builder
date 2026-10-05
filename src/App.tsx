@@ -719,13 +719,7 @@ function App() {
             </div>
 
             <div className={styles.tableWrap}>
-              <h3>Defensa detallada por tipo recibido</h3>
-              <p>
-                En cada tipo de ataque puedes ver el conteo y exactamente que Pokemon de tu
-                equipo son debiles, resisten o son inmunes. Este calculo ya incluye efectos
-                defensivos de habilidades (por ejemplo Flash Fire, Levitate, Water Absorb).
-              </p>
-
+              <h3>Defensa por tipo</h3>
               <div className={styles.dataTable}>
                 <div className={styles.dataHeaderRow}>
                   <div>Tipo ataque recibido</div>
@@ -824,7 +818,7 @@ function App() {
             </div>
 
             <div className={styles.tableWrap}>
-              <h3>Presion ofensiva por tipo objetivo</h3>
+              <h3>Eficacia por tipo de ataque</h3>
 
               <div className={`${styles.dataTable} ${styles.dataTableOffense}`}>
                 <div className={styles.dataHeaderRow}>
