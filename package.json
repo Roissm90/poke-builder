@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@pkmn/dex": "^0.10.11",
+    "@pkmn/sim": "^0.10.11",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

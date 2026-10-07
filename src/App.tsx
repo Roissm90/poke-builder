@@ -1,4 +1,3 @@
-import { Dex } from '@pkmn/dex'
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import './App.scss'
 import { analyzeTeam } from './lib/analyzer'
@@ -14,29 +13,18 @@ import {
   resolveMoveType,
   resolveSpeciesTypes,
 } from './lib/dexResolver'
+import {
+  OFFICIAL_ABILITY_OPTIONS,
+  OFFICIAL_MOVE_OPTIONS,
+  OFFICIAL_POKEMON_OPTIONS,
+} from './lib/dexOptions'
 import { parseShowdownTeam, validateShowdownTeamText } from './lib/showdownParser'
+import { getSpriteUrl } from './lib/sprite'
+import BattleTab from './BattleTab'
 
 const styles = new Proxy({} as Record<string, string>, {
   get: (_, property: string | symbol) => String(property),
 }) as Record<string, string>
-
-const OFFICIAL_MOVE_OPTIONS = Dex.moves
-  .all()
-  .filter((move) => move.exists)
-  .sort((a, b) => a.name.localeCompare(b.name))
-
-const OFFICIAL_ABILITY_OPTIONS = Dex.abilities
-  .all()
-  .filter((ability) => ability.exists)
-  .map((ability) => ability.name)
-  .filter((name) => Boolean(name))
-  .sort((a, b) => a.localeCompare(b))
-
-const OFFICIAL_POKEMON_OPTIONS = Dex.species
-  .all()
-  .map((species) => species.name)
-  .filter((name) => Boolean(name))
-  .sort((a, b) => a.localeCompare(b))
 
 const SHOWDOWN_SESSION_KEY = 'poke-builder-showdown-text'
 
@@ -57,27 +45,6 @@ function createEmptyMember(): TeamMember {
     ],
     source: 'manual',
   }
-}
-
-function normalizeSpeciesForSprite(species: string): string {
-  return species
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/♀/g, '-f')
-    .replace(/♂/g, '-m')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-}
-
-function getSpriteUrl(species: string): string | null {
-  const id = normalizeSpeciesForSprite(species)
-  if (!id) {
-    return null
-  }
-
-  return `https://play.pokemonshowdown.com/sprites/gen5/${id}.png`
 }
 
 function getPokemonSprite(team: TeamMember[], species: string): string | null {
@@ -105,6 +72,7 @@ function App() {
     return window.sessionStorage.getItem(SHOWDOWN_SESSION_KEY) ?? ''
   })
   const [error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState<'builder' | 'battle'>('builder')
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
   const [activeTypeTooltip, setActiveTypeTooltip] = useState<TypeTooltipState | null>(null)
   const [expandedSynergyPokemon, setExpandedSynergyPokemon] = useState<string[]>([])
@@ -367,6 +335,27 @@ function App() {
         <h1>Poke Randomlocke Builder</h1>
       </section>
 
+      <nav className={styles.tabBar}>
+        <button
+          type="button"
+          className={`${styles.tabButton} ${activeTab === 'builder' ? styles.tabButtonActive : ''}`}
+          onClick={() => setActiveTab('builder')}
+        >
+          Constructor de equipo
+        </button>
+        <button
+          type="button"
+          className={`${styles.tabButton} ${activeTab === 'battle' ? styles.tabButtonActive : ''}`}
+          onClick={() => setActiveTab('battle')}
+        >
+          Simulador de combate
+        </button>
+      </nav>
+
+      {activeTab === 'battle' ? (
+        <BattleTab team={team} />
+      ) : (
+        <>
       <section className={styles.block}>
         <h2>Importar texto Showdown</h2>
         <div className={styles.showdownBox}>
@@ -1446,6 +1435,8 @@ function App() {
           </div>
         </div>
       ) : null}
+        </>
+      )}
     </main>
   )
 }

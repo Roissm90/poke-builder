@@ -147,6 +147,16 @@ strong {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+  .spriteWrap {
+    width: 80px;
+    height: 80px;
+
+    .sprite {
+      width: 80px;
+      height: 80px;
+    }
+  }
 }
 
 .typeLine {
@@ -237,18 +247,30 @@ strong {
 }
 
 .spriteWrap {
-  width: 92px;
-  height: 92px;
+  width: 24px;
+  height: 24px;
   border-radius: 12px;
-  background: #111c2f;
+  background: transparent;
   display: grid;
   place-items: center;
 }
 
 .sprite {
-  width: 80px;
-  height: 80px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
+}
+
+.battleRivalGrid {
+  .spriteWrap {
+    width: 80px;
+    height: 80px;
+
+    .sprite {
+      width: 80px;
+      height: 80px;
+    }
+  }
 }
 
 .spritePlaceholder {
@@ -679,7 +701,7 @@ strong {
   display: grid;
   gap: 8px;
 
-  > div {
+  >div {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -747,6 +769,7 @@ strong {
 }
 
 .dataTableOffense {
+
   .dataHeaderRow,
   .dataRow {
     grid-template-columns: 1fr;
@@ -759,7 +782,7 @@ strong {
   font-weight: 700;
   border-bottom: 1px solid #2a3d58;
 
-  > div {
+  >div {
     padding: 10px 12px;
   }
 }
@@ -771,7 +794,7 @@ strong {
     border-bottom: 0;
   }
 
-  > div {
+  >div {
     padding: 10px 12px;
     min-width: 0;
   }
@@ -877,18 +900,18 @@ strong {
 }
 
 @media (min-width: 760px) {
+
   .dataHeaderRow,
   .dataRow {
     grid-template-columns: minmax(80px, 100px) minmax(0, 1fr);
   }
 
   .dataTableOffense {
+
     .dataHeaderRow,
     .dataRow {
-      grid-template-columns: minmax(80px, 100px) minmax(60px, 80px) minmax(
-          0,
-          1fr
-        );
+      grid-template-columns: minmax(80px, 100px) minmax(60px, 80px) minmax(0,
+          1fr);
     }
   }
 }
@@ -937,4 +960,500 @@ strong {
     width: 62px;
     height: 62px;
   }
+}
+
+.tabBar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tabButton {
+  background: var(--panel-bg-soft);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.tabButtonActive {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.battleTab {
+  display: grid;
+  gap: 16px;
+}
+
+.battleMiniGrid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  h4 {
+    display: none;
+  }
+
+  &.my-team {
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    h4 {
+      display: block;
+      text-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    .spriteWrap {
+      width: 48px;
+      height: 48px;
+
+      .sprite {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  }
+
+  &.my-team-ban {
+    .spriteWrap {
+      width: 80px;
+      height: 80px;
+
+      .sprite {
+        width: 80px;
+        height: 80px;
+      }
+    }
+
+    .battleMiniCardDetails {
+      display: none;
+    }
+  }
+}
+
+.battleMiniCard {
+  position: relative;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 10px;
+  background: var(--panel-bg-soft);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+
+  h4 {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--title);
+  }
+}
+
+.battleMiniCardClickable {
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 26px rgba(3, 10, 24, 0.45);
+  }
+}
+
+.battleMiniCardSelected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.battleMiniCardFaded {
+  opacity: 0.45;
+}
+
+.battleMiniCardBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.battleMiniCardDetails {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 2px;
+
+  p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.battleRivalGrid {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 12px;
+
+  @media (max-width: 767px) {
+    justify-content: space-between;
+  }
+}
+
+.battleRivalCard {
+  position: relative;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--panel-bg-soft);
+  display: flex;
+  gap: 6px;
+  justify-content: flex-start;
+  text-align: left;
+  align-items: center;
+
+  h4 {
+    margin: 0;
+    color: var(--title);
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    align-items: flex-start;
+    width: calc(33% - 12px);
+  }
+
+  @media (max-width: 479px) {
+    width: calc(50% - 8px);
+  }
+}
+
+.battleRivalForm {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  text-align: left;
+
+  label {
+    display: grid;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  input {
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-main);
+    padding: 6px 8px;
+  }
+}
+
+.battleBanColumns {
+  margin-top: 12px;
+  display: flex;
+  gap: 20px;
+
+  >div {
+    width: 50%;
+
+    .battleMiniCard {
+      width: fit-content;
+      border-radius: 999px;
+    }
+  }
+
+  &.combat-team-pre-ban {
+    > div:first-child {
+      .battleMiniCard {
+        border-radius: 8px;
+      }
+    }
+  }
+
+  h4 {
+    display: none;
+  }
+
+  .spriteWrap {
+    width: 80px;
+    height: 80px;
+
+    .sprite {
+      width: 80px;
+      height: 80px;
+    }
+  }
+
+  .battleMiniCard {
+    width: 50%;
+    max-width: calc(50% - 10px);
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 1023px) {
+    flex-direction: column;
+
+    >div {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 479px) {
+    >div {
+      &:first-child {
+        .battleMiniCard {
+          width: 100%;
+          max-width: 100%;
+          flex-direction: row;
+        }
+      }
+    }
+  }
+}
+
+.battleLogBox {
+  margin-top: 12px;
+  max-height: 360px;
+  overflow-y: auto;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.battleResult {
+  margin-top: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.battleResultWin {
+  color: #68d391;
+}
+
+.battleResultLoss {
+  color: #ff809f;
+}
+
+.battleModeSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 10px;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+}
+
+.battleManualControls {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.battleActiveColumns {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 10px;
+}
+
+.battleSlotControls {
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--panel-bg-soft);
+
+  h4 {
+    margin: 0 0 8px;
+    color: var(--title);
+  }
+}
+
+.battleSlotCondition {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.battleSlotMeta {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.battleSlotModeTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+
+  button {
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.battleSlotModeActive {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}
+
+.battleMoveGrid {
+  display: grid;
+  gap: 8px;
+}
+
+.battleMoveWrap {
+  display: grid;
+  gap: 6px;
+}
+
+.battleMoveBtn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-main);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent-soft);
+  }
+}
+
+.battleMoveBtnSelected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.battleTargetRow {
+  display: flex;
+  gap: 6px;
+  padding-left: 10px;
+}
+
+.battleTargetBtn,
+.battleTargetBtnSelected {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+
+.battleTargetSprite {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.battleTargetInfo {
+  display: grid;
+  gap: 1px;
+}
+
+.battleTargetName {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.battleTargetHp {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.battleTargetStatus {
+  font-size: 0.72rem;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.battleTargetBtnSelected {
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--accent);
+
+  .battleTargetName,
+  .battleTargetHp {
+    color: #fff;
+  }
+
+  .battleTargetStatus {
+    color: #ffe08a;
+  }
+}
+
+.battleTeraToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
 }

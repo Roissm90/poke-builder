@@ -30,16 +30,19 @@ function isValidBlock(block: string): boolean {
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
 
-  if (lines.length < 2) {
+  if (lines.length === 0) {
     return false
   }
 
-  const hasHead = lines[0].includes('@')
-  const hasAbility = lines.some((line) => line.startsWith('Ability:'))
-  const hasNature = lines.some((line) => line.endsWith(' Nature'))
-  const hasMove = lines.some((line) => line.startsWith('-'))
+  // Only the species line is mandatory; item, ability, nature and moves are optional in Showdown's format.
+  const head = lines[0]
+  const isMetaLine =
+    head.startsWith('-') ||
+    head.startsWith('Ability:') ||
+    / Nature$/i.test(head) ||
+    /^(EVs|IVs|Level|Shiny|Happiness|Tera Type):/i.test(head)
 
-  return hasHead && hasAbility && hasNature && hasMove
+  return !isMetaLine
 }
 
 function buildMember(block: string, index: number): TeamMember | null {
