@@ -384,7 +384,7 @@ function App() {
           />
         </div>
         <div className={styles.actions}>
-          <button type="button" onClick={addManualMember}>
+          <button type="button" onClick={addManualMember} style={{ padding: '6px 0' }}>
             Añadir manualmente
           </button>
         </div>

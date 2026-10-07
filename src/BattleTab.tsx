@@ -827,10 +827,10 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
           />
         </div>
         <div className={styles.actions}>
-          <button type="button" onClick={addRivalManualMember}>
+          {/*<button type="button" onClick={addRivalManualMember} style={{ padding: '6px 0' }}>
             Añadir manualmente
-          </button>
-          <button type="button" onClick={generateRandomRival} disabled={team.length === 0}>
+          </button>*/}
+          <button type="button" onClick={generateRandomRival} disabled={team.length === 0} style={{ padding: '6px 0' }}>
             Generar equipo rival aleatorio
           </button>
         </div>
@@ -961,11 +961,11 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
           </p>
 
           <div className={`${styles.actions} `}>
-            <button type="button" onClick={generateRivalBan} disabled={phase !== 'setup'}>
+            <button type="button" onClick={generateRivalBan} disabled={phase !== 'setup'} style={{ padding: '6px 0' }}>
               {myBan ? 'Baneo del rival generado' : 'Generar baneo del rival'}
             </button>
             {phase !== 'setup' ? (
-              <button type="button" onClick={resetBattleFlow}>
+              <button type="button" onClick={resetBattleFlow} style={{ padding: '6px 0' }}>
                 Reiniciar baneos
               </button>
             ) : null}
@@ -1012,7 +1012,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
 
           {myBan && rivalBanId && phase === 'bans' ? (
             <div className={styles.actions}>
-              <button type="button" onClick={proceedToSquadSelection}>
+              <button type="button" onClick={proceedToSquadSelection} style={{ padding: '6px 0' }}>
                 Continuar a seleccion de equipo
               </button>
             </div>
@@ -1062,6 +1062,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
                 type="button"
                 onClick={confirmSquadAndSimulate}
                 disabled={mySquadIds.length !== squadTarget}
+                style={{ padding: '6px 0' }}
               >
                 Confirmar equipo y simular combate
               </button>
@@ -1237,7 +1238,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
           ) : null}
 
           <div className={styles.actions}>
-            <button type="button" onClick={resetBattleFlow}>
+            <button type="button" onClick={resetBattleFlow} style={{ padding: '6px 0' }}>
               Reiniciar simulador
             </button>
           </div>
