@@ -40,7 +40,7 @@
 .block {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 16px;
+  border-radius: 4px;
   padding: 16px;
   box-shadow: 0 18px 42px rgba(2, 8, 22, 0.35);
   width: 100%;
@@ -79,7 +79,7 @@ button {
 .textarea {
   width: 100%;
   border: 1px solid var(--input-border);
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--input-bg);
   color: var(--text-main);
   padding: 12px;
@@ -112,15 +112,15 @@ button {
 
 button {
   border: 0;
-  border-radius: 10px;
-  background: var(--accent);
+  background: transparent;
   color: #ffffff;
-  padding: 10px 14px;
+  padding: 6px 10px;
   cursor: pointer;
+  font-weight: 700;
 
   &:disabled {
-    background: #49608a;
     color: #d2d9e7;
+    opacity: 0.7;
     cursor: not-allowed;
   }
 }
@@ -176,7 +176,7 @@ strong {
 .memberCardCompact {
   position: relative;
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  border-radius: 4px;
   padding: 12px;
   background: var(--panel-bg-soft);
   cursor: pointer;
@@ -660,7 +660,7 @@ strong {
 
 .synergyGroup {
   border: 1px solid #2a3d58;
-  border-radius: 12px;
+  border-radius: 4px;
   background: #0d1727;
   overflow: hidden;
 }
@@ -672,7 +672,7 @@ strong {
   gap: 10px;
   padding: 10px 12px;
   border: 0;
-  border-radius: 0;
+  border-radius: 4px;
   background: transparent;
   color: var(--text-main);
   text-align: left;
@@ -699,7 +699,7 @@ strong {
 
 .synergyPairRow {
   border: 1px solid #26394f;
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 10px;
   background: #101d30;
   display: grid;
@@ -754,7 +754,7 @@ strong {
   display: grid;
   gap: 0;
   border: 1px solid #2a3d58;
-  border-radius: 12px;
+  border-radius: 4px;
   overflow: hidden;
   background: #0d1727;
 }
@@ -969,7 +969,7 @@ strong {
 .tabBar {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .tabButton {
@@ -977,6 +977,11 @@ strong {
   border: 1px solid var(--panel-border);
   color: var(--text-muted);
   font-weight: 600;
+  border-radius: 4px;
+
+  @media (max-width: 479px) {
+    width: 50%;
+  }
 }
 
 .tabButtonActive {
@@ -1041,6 +1046,15 @@ strong {
 
     .battleMiniCardDetails {
       display: none;
+    }
+  }
+
+  &.my-team-ban-post {
+    @media (max-width: 479px) {
+      .battleMiniCard {
+        width: fit-content !important;
+        border-radius: 999px;
+      }
     }
   }
 }
@@ -1127,7 +1141,7 @@ strong {
 .battleRivalCard {
   position: relative;
   border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  border-radius: 4px;
   padding: 12px;
   background: var(--panel-bg-soft);
   display: flex;
@@ -1200,7 +1214,7 @@ strong {
   &.combat-team-pre-ban {
     >div:first-child {
       .battleMiniCard {
-        border-radius: 8px;
+        border-radius: 4px;
         width: 50%;
 
         @media (max-width: 479px) {
@@ -1268,7 +1282,7 @@ strong {
   overflow-y: auto;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 12px;
   font-family: 'SFMono-Regular', Consolas, monospace;
   font-size: 0.78rem;
@@ -1322,7 +1336,7 @@ strong {
 
 .battleSlotControls {
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 12px;
   background: var(--panel-bg-soft);
 
@@ -1352,7 +1366,7 @@ strong {
   button {
     flex: 1;
     padding: 6px 8px;
-    border-radius: 8px;
+    border-radius: 4px;
     border: 1px solid var(--input-border);
     background: var(--input-bg);
     color: var(--text-muted);
@@ -1385,7 +1399,7 @@ strong {
   width: 100%;
   text-align: left;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 4px;
   border: 1px solid var(--input-border);
   background: var(--input-bg);
   color: var(--text-main);

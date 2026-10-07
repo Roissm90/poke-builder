@@ -348,14 +348,14 @@ function App() {
           className={`${styles.tabButton} ${activeTab === 'builder' ? styles.tabButtonActive : ''}`}
           onClick={() => setActiveTab('builder')}
         >
-          Constructor de equipo
+          Team Builder
         </button>
         <button
           type="button"
           className={`${styles.tabButton} ${activeTab === 'battle' ? styles.tabButtonActive : ''}`}
           onClick={() => setActiveTab('battle')}
         >
-          Simulador de combate
+          Battle Simulator
         </button>
       </nav>
 

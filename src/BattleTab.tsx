@@ -1074,10 +1074,10 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
         <section className={styles.block}>
           <h2>Combate 2vs2</h2>
 
-          <div className={styles.battleBanColumns}>
+          <div className={`${styles.battleBanColumns}`}>
             <div>
               <h3>Mi equipo de combate</h3>
-              <div className={styles.battleMiniGrid}>
+              <div className={`${styles.battleMiniGrid} my-team-ban-post`}>
                 {mySquadMembers.map((member) => (
                   <MiniCard key={member.id} member={member} />
                 ))}
