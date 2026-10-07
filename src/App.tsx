@@ -364,7 +364,7 @@ function App() {
       ) : (
         <>
       <section className={styles.block}>
-        <h2>Importar texto Showdown</h2>
+        <h2>Importar texto <a className={`showdown-link`} href="https://pokemonshowdown.com/teambuilder" target="_blank" rel="noopener noreferrer">Showdown</a></h2>
         <div className={styles.showdownBox}>
           <button
             type="button"
