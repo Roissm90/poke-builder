@@ -1114,14 +1114,14 @@ strong {
 .battleRivalGrid {
   margin-top: 12px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: stretch;
   justify-content: flex-start;
   gap: 12px;
-
-  @media (max-width: 767px) {
-    justify-content: space-between;
-  }
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  width: 100%;
 }
 
 .battleRivalCard {
@@ -1135,10 +1135,13 @@ strong {
   justify-content: flex-start;
   text-align: left;
   align-items: center;
+  flex: 1;
 
   h4 {
     margin: 0;
     color: var(--title);
+    text-wrap: nowrap;
+    white-space: nowrap;
   }
 
   p {
@@ -1195,7 +1198,7 @@ strong {
   }
 
   &.combat-team-pre-ban {
-    > div:first-child {
+    >div:first-child {
       .battleMiniCard {
         border-radius: 8px;
         width: 50%;
@@ -1203,6 +1206,14 @@ strong {
         @media (max-width: 479px) {
           width: 100%;
           max-width: 100%;
+        }
+      }
+    }
+
+    >div:last-child {
+      .battleMiniGrid {
+        @media (max-width: 499px) {
+          justify-content: space-between;
         }
       }
     }
