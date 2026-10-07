@@ -117,6 +117,7 @@ button {
   font-weight: 700;
   background: #d63963;
   z-index: 1;
+  text-decoration: none;
 }
 
 .actions {
@@ -133,6 +134,7 @@ button {
   padding: 6px 10px;
   cursor: pointer;
   font-weight: 700;
+  text-decoration: underline;
 
   &:disabled {
     color: #d2d9e7;
@@ -233,6 +235,7 @@ strong {
   border-radius: 999px;
   font-size: 0.78rem;
   background: var(--danger);
+  text-decoration: none;
 }
 
 .addTeamCard {
@@ -692,6 +695,7 @@ strong {
   background: transparent;
   color: var(--text-main);
   text-align: left;
+  text-decoration: none;
 }
 
 .synergyArrow {
@@ -1001,6 +1005,7 @@ strong {
   color: var(--text-muted);
   font-weight: 600;
   border-radius: 4px;
+  text-decoration: none;
 
   @media (max-width: 479px) {
     width: 50%;
@@ -1410,6 +1415,7 @@ strong {
   background: var(--accent) !important;
   color: #fff !important;
   border-color: var(--accent) !important;
+  text-decoration: none;
 }
 
 .battleMoveGrid {
@@ -1431,6 +1437,7 @@ strong {
   background: var(--input-bg);
   color: var(--text-main);
   cursor: pointer;
+  text-decoration: none;
 
   &:disabled {
     opacity: 0.35;
