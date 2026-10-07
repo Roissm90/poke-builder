@@ -174,7 +174,10 @@ function pickItemAndNature(atk: number, spa: number, def: number, spd: number, s
 
 /** Genera un equipo rival aleatorio con Pokemon de stats totales similares a cada miembro de `myTeam`. */
 export function generateRandomRivalTeam(myTeam: TeamMember[]): TeamMember[] {
-  const allSpecies = Dex.species.all().filter((species) => species.exists && species.isNonstandard === null)
+  const allSpecies = Dex.species
+    .all()
+    // Nunca se generan legendarios/miticos/ultraentes/paradojicos como rival aleatorio.
+    .filter((species) => species.exists && species.isNonstandard === null && species.tags.length === 0)
 
   const used = new Set<string>()
   const rivalTeam: TeamMember[] = []
