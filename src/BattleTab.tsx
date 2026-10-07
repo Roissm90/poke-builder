@@ -845,7 +845,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
                   className={styles.removeCardBtn}
                   onClick={() => removeRivalMember(member.id)}
                 >
-                  X
+                  x
                 </button>
 
                 <div className={styles.spriteWrap}>

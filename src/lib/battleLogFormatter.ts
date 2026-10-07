@@ -1,3 +1,5 @@
+import { TYPE_NAME_ES } from './typeNames'
+
 type Tags = { from?: string; of?: string }
 
 const STAT_NAMES: Record<string, string> = {
@@ -34,26 +36,7 @@ const WEATHER_NAMES: Record<string, string> = {
   deltastream: 'Corriente extraña',
 }
 
-const TYPE_NAMES: Record<string, string> = {
-  normal: 'Normal',
-  fire: 'Fuego',
-  water: 'Agua',
-  electric: 'Electrico',
-  grass: 'Planta',
-  ice: 'Hielo',
-  fighting: 'Lucha',
-  poison: 'Veneno',
-  ground: 'Tierra',
-  flying: 'Volador',
-  psychic: 'Psiquico',
-  bug: 'Bicho',
-  rock: 'Roca',
-  ghost: 'Fantasma',
-  dragon: 'Dragon',
-  dark: 'Siniestro',
-  steel: 'Acero',
-  fairy: 'Hada',
-}
+const TYPE_NAMES: Record<string, string> = TYPE_NAME_ES
 
 const REASON_NAMES: Record<string, string> = {
   par: 'paralisis',

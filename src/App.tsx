@@ -20,6 +20,7 @@ import {
 } from './lib/dexOptions'
 import { parseShowdownTeam, validateShowdownTeamText } from './lib/showdownParser'
 import { DEFAULT_SPRITE_CLASS, DEFAULT_SPRITE_URL, getSpriteUrl, handleSpriteImgError } from './lib/sprite'
+import { translateType } from './lib/typeNames'
 import BattleTab from './BattleTab'
 
 const styles = new Proxy({} as Record<string, string>, {
@@ -364,7 +365,7 @@ function App() {
       ) : (
         <>
       <section className={styles.block}>
-        <h2>Importar texto <a className={`showdown-link`} href="https://pokemonshowdown.com/teambuilder" target="_blank" rel="noopener noreferrer">Showdown</a></h2>
+        <h2>Importar texto <a className={`showdown-link`} href="https://play.pokemonshowdown.com/teambuilder" target="_blank" rel="noopener noreferrer">Showdown</a></h2>
         <div className={styles.showdownBox}>
           <button
             type="button"
@@ -418,7 +419,7 @@ function App() {
                       removeMember(member.id)
                     }}
                   >
-                    X
+                    x
                   </button>
 
                   <div className={styles.spriteWrap}>
@@ -435,7 +436,7 @@ function App() {
                       member.types.map((type, index) => (
                         <span key={`${member.id}-type-${type}`} className={styles.typeText}>
                           {index > 0 ? ' / ' : ''}
-                          {type}
+                          {translateType(type)}
                         </span>
                       ))
                     ) : (
@@ -616,7 +617,7 @@ function App() {
                         <option value="">-</option>
                         {POKEMON_TYPES.map((type) => (
                           <option key={`t1-${editingMember.id}-${type}`} value={type}>
-                            {type}
+                            {translateType(type)}
                           </option>
                         ))}
                       </select>
@@ -634,7 +635,7 @@ function App() {
                         <option value="">-</option>
                         {POKEMON_TYPES.map((type) => (
                           <option key={`t2-${editingMember.id}-${type}`} value={type}>
-                            {type}
+                            {translateType(type)}
                           </option>
                         ))}
                       </select>
@@ -1098,7 +1099,7 @@ function App() {
 
                 {analysis.defensiveByType.map((row) => (
                   <div key={row.type} className={styles.dataRow}>
-                    <div className={styles.dataLabel}>{row.type}</div>
+                    <div className={styles.dataLabel}>{translateType(row.type)}</div>
 
                     <div className={styles.dataValue}>
                       <div className={styles.detailRow}>
@@ -1194,7 +1195,7 @@ function App() {
 
                 {analysis.offensiveByTargetType.map((row) => (
                   <div key={`atk-${row.targetType}`} className={styles.dataRow}>
-                    <div className={styles.dataLabel}>{row.targetType}</div>
+                    <div className={styles.dataLabel}>{translateType(row.targetType)}</div>
                     <div className={styles.dataValue}>{row.bestMultiplier.toFixed(2)}x</div>
                     <div className={styles.dataValue}>
                       {row.sources.length > 0 ? (
@@ -1286,7 +1287,7 @@ function App() {
                                             key={`${entry.pokemon}-${row.pairIndex}-shared-${type}`}
                                             className={styles.typeChip}
                                           >
-                                            {type}
+                                            {translateType(type)}
                                           </span>
                                         ))}
                                       </div>
@@ -1328,7 +1329,7 @@ function App() {
                                             }}
                                             onBlur={() => setActiveTypeTooltip(null)}
                                           >
-                                            <span className={styles.typeChip}>{type}</span>
+                                            <span className={styles.typeChip}>{translateType(type)}</span>
                                           </span>
                                         ))}
                                       </div>
