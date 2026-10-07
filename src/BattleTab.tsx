@@ -49,7 +49,7 @@ type Phase = 'setup' | 'bans' | 'squad' | 'result'
 type BattleMode = 'auto' | 'manual'
 
 type PendingChoice =
-  | { kind: 'move'; moveSlot: number; target?: number; terastallize?: boolean }
+  | { kind: 'move'; moveSlot: number; target?: number; terastallize?: boolean; megaEvolve?: boolean }
   | { kind: 'switch'; pokemonSlot: number }
   | { kind: 'pass' }
 
@@ -145,6 +145,9 @@ function choiceToString(choice: PendingChoice | null): string {
   if (choice.terastallize) {
     text += ' terastallize'
   }
+  if (choice.megaEvolve) {
+    text += ' mega'
+  }
   return text
 }
 
@@ -235,6 +238,7 @@ function ActiveSlotControls({
   pokemonCondition,
   moves,
   canTerastallize,
+  canMegaEvo,
   benchOptions,
   pending,
   onChange,
@@ -248,6 +252,7 @@ function ActiveSlotControls({
   pokemonCondition: string
   moves: MoveRequestOption[]
   canTerastallize?: string
+  canMegaEvo?: boolean
   benchOptions: { slot: number; label: string }[]
   pending: PendingChoice | null
   onChange: (choice: PendingChoice | null) => void
@@ -258,6 +263,7 @@ function ActiveSlotControls({
 }) {
   const [mode, setMode] = useState<'move' | 'switch'>(switchOnly ? 'switch' : 'move')
   const pendingTera = pending?.kind === 'move' ? Boolean(pending.terastallize) : false
+  const pendingMega = pending?.kind === 'move' ? Boolean(pending.megaEvolve) : false
 
   return (
     <div className={styles.battleSlotControls}>
@@ -314,6 +320,7 @@ function ActiveSlotControls({
                       moveSlot: moveSlotNumber,
                       target: implicitTarget,
                       terastallize: pendingTera,
+                      megaEvolve: pendingMega,
                     })
                   }
                 >
@@ -353,6 +360,7 @@ function ActiveSlotControls({
                               moveSlot: moveSlotNumber,
                               target: option.value,
                               terastallize: pendingTera,
+                              megaEvolve: pendingMega,
                             })
                           }
                         >
@@ -397,6 +405,7 @@ function ActiveSlotControls({
                             moveSlot: moveSlotNumber,
                             target: option.value,
                             terastallize: pendingTera,
+                            megaEvolve: pendingMega,
                           })
                         }
                       >
@@ -423,6 +432,23 @@ function ActiveSlotControls({
                 }}
               />
               Teracristalizar ({canTerastallize})
+            </label>
+          ) : null}
+
+          {canMegaEvo ? (
+            <label className={styles.battleTeraToggle}>
+              <input
+                type="checkbox"
+                checked={pendingMega}
+                disabled={pending?.kind !== 'move'}
+                onChange={(event) => {
+                  if (pending?.kind !== 'move') {
+                    return
+                  }
+                  onChange({ ...pending, megaEvolve: event.target.checked })
+                }}
+              />
+              Megaevolucionar
             </label>
           ) : null}
         </div>
@@ -1217,6 +1243,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
                           pokemonCondition={pokemon.condition}
                           moves={activeData.moves}
                           canTerastallize={activeData.canTerastallize}
+                          canMegaEvo={activeData.canMegaEvo}
                           benchOptions={benchOptions}
                           pending={pendingChoices[slotIndex]}
                           onChange={(choice) => updatePendingChoice(slotIndex, choice)}

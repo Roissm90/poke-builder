@@ -11,6 +11,7 @@ export type ActiveRequestData = {
   moves: MoveRequestOption[]
   trapped?: boolean
   canTerastallize?: string
+  canMegaEvo?: boolean
 }
 
 export type PokemonRequestData = {

@@ -77,7 +77,7 @@ export async function startInteractiveBattle(
   }
 
   const p1 = new ManualPlayer(streams.p1)
-  const p2 = new RandomPlayerAI(streams.p2)
+  const p2 = new RandomPlayerAI(streams.p2, { mega: 1 })
 
   void p1.start()
   void p2.start()
