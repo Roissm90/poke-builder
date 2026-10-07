@@ -1283,7 +1283,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
             <div className={styles.modalHeader}>
               <h3>{resultLabel}</h3>
               <button type="button" onClick={closeResultModal}>
-                Cerrar
+                x
               </button>
             </div>
 
