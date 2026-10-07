@@ -11,6 +11,7 @@ import {
   type MoveRequestOption,
 } from './lib/battleRequest'
 import { runDoublesBattle } from './lib/battleSim'
+import { faintedSpeciesForSide, groupLogByTurn } from './lib/battleTurns'
 import {
   enrichTeamWithDex,
   resolveMoveCategory,
@@ -168,25 +169,6 @@ function isPendingChoiceComplete(
     return false
   }
   return true
-}
-
-function createEmptyRivalMember(): TeamMember {
-  return {
-    id: crypto.randomUUID(),
-    species: '',
-    spriteUrl: null,
-    item: '',
-    ability: '',
-    nature: '',
-    types: [],
-    moves: [
-      { name: '', type: null, category: null },
-      { name: '', type: null, category: null },
-      { name: '', type: null, category: null },
-      { name: '', type: null, category: null },
-    ],
-    source: 'manual',
-  }
 }
 
 function MiniCard({
@@ -475,6 +457,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
   })
   const [rivalTeam, setRivalTeam] = useState<TeamMember[]>([])
   const [rivalError, setRivalError] = useState('')
+  const [rivalIsRandom, setRivalIsRandom] = useState(false)
 
   const [phase, setPhase] = useState<Phase>('setup')
   const [myBan, setMyBan] = useState<{ id: string; reason: string } | null>(null)
@@ -494,6 +477,8 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
   const [battleEnded, setBattleEnded] = useState(false)
   const [rivalSlots, setRivalSlots] = useState<(RivalSlotInfo | null)[]>([null, null])
   const [rivalAliveCount, setRivalAliveCount] = useState<number | null>(null)
+  const [showResultModal, setShowResultModal] = useState(false)
+  const [activeModalTurnIndex, setActiveModalTurnIndex] = useState(0)
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -518,20 +503,11 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
         })),
       )
       setRivalError('')
+      setRivalIsRandom(false)
     }, 250)
 
     return () => window.clearTimeout(timer)
   }, [rivalShowdownText])
-
-  function addRivalManualMember() {
-    if (rivalTeam.length >= 6) {
-      setRivalError('Un equipo completo tiene 6 Pokemon.')
-      return
-    }
-
-    setRivalTeam((current) => [...current, createEmptyRivalMember()])
-    setRivalError('')
-  }
 
   function updateRivalMember(memberId: string, patch: Partial<TeamMember>) {
     setRivalTeam((current) =>
@@ -585,6 +561,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
     setRivalShowdownText('')
     window.sessionStorage.removeItem(RIVAL_SESSION_KEY)
     setRivalError('')
+    setRivalIsRandom(false)
   }
 
   function generateRandomRival() {
@@ -597,6 +574,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
     window.sessionStorage.removeItem(RIVAL_SESSION_KEY)
     setRivalTeam(generateRandomRivalTeam(team))
     setRivalError('')
+    setRivalIsRandom(true)
   }
 
   function resetBattleFlow() {
@@ -614,6 +592,17 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
     setBattleEnded(false)
     setRivalSlots([null, null])
     setRivalAliveCount(null)
+    setShowResultModal(false)
+    setActiveModalTurnIndex(0)
+  }
+
+  /** Cierra el modal de resultado y reinicia el flujo; el rival solo se limpia si era aleatorio. */
+  function closeResultModal() {
+    resetBattleFlow()
+    if (rivalIsRandom) {
+      setRivalTeam([])
+      setRivalIsRandom(false)
+    }
   }
 
   function generateRivalBan() {
@@ -692,6 +681,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
         setBattleWinner(
           result.winnerSide === 'p1' ? 'mine' : result.winnerSide === 'p2' ? 'rival' : 'draw',
         )
+        setShowResultModal(true)
       } catch (err) {
         setBattleError(
           err instanceof Error
@@ -725,6 +715,7 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
           setBattleWinner(
             winnerName === BATTLE_MY_NAME ? 'mine' : winnerName === BATTLE_RIVAL_NAME ? 'rival' : 'draw',
           )
+          setShowResultModal(true)
         },
       }, BATTLE_MY_NAME, BATTLE_RIVAL_NAME)
       setInteractiveHandle(handle)
@@ -789,6 +780,50 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
     [battleLog],
   )
 
+  const resultTurns = useMemo(() => groupLogByTurn(readableBattleLog), [readableBattleLog])
+  const faintedMySpecies = useMemo(() => faintedSpeciesForSide(battleLog, 'p1'), [battleLog])
+  const faintedRivalSpecies = useMemo(() => faintedSpeciesForSide(battleLog, 'p2'), [battleLog])
+
+  const resultSquad = battleWinner === 'rival' ? (rivalSquad ?? []) : mySquadMembers
+  const resultFaintedSpecies = battleWinner === 'rival' ? faintedRivalSpecies : faintedMySpecies
+  const resultLabel =
+    battleWinner === 'mine'
+      ? 'Ganaste el combate'
+      : battleWinner === 'rival'
+        ? 'Gano el equipo rival'
+        : 'Combate sin ganador claro'
+
+  useEffect(() => {
+    if (showResultModal) {
+      setActiveModalTurnIndex(Math.max(0, resultTurns.length - 1))
+    }
+    // Solo se debe re-centrar la tab al abrir el modal, no en cada cambio del log.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showResultModal])
+
+  useEffect(() => {
+    if (!showResultModal) {
+      return
+    }
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [showResultModal])
+
+  useEffect(() => {
+    if (!showResultModal) {
+      return
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        closeResultModal()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showResultModal])
+
   return (
     <div className={styles.battleTab}>
       <section className={styles.block}>
@@ -827,9 +862,6 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
           />
         </div>
         <div className={styles.actions}>
-          {/*<button type="button" onClick={addRivalManualMember} style={{ padding: '6px 0' }}>
-            Añadir manualmente
-          </button>*/}
           <button type="button" onClick={generateRandomRival} disabled={team.length === 0} style={{ padding: '6px 0' }}>
             Generar equipo rival aleatorio
           </button>
@@ -1243,6 +1275,59 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
             </button>
           </div>
         </section>
+      ) : null}
+
+      {showResultModal ? (
+        <div className={styles.modalOverlay} onClick={closeResultModal} role="presentation">
+          <section className={styles.modalCard} onClick={(event) => event.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>{resultLabel}</h3>
+              <button type="button" onClick={closeResultModal}>
+                Cerrar
+              </button>
+            </div>
+
+            <div className={styles.battleResultModalBody}>
+              <div className={styles.battleMiniGrid}>
+                {resultSquad.map((member) => (
+                  <MiniCard
+                    key={member.id}
+                    member={member}
+                    faded={resultFaintedSpecies.has(member.species.trim().toLowerCase())}
+                    label={
+                      resultFaintedSpecies.has(member.species.trim().toLowerCase())
+                        ? 'Debilitado'
+                        : undefined
+                    }
+                  />
+                ))}
+              </div>
+
+              {resultTurns.length > 0 ? (
+                <>
+                  <div className={styles.battleSlotModeTabs}>
+                    {resultTurns.map((turnLog, index) => (
+                      <button
+                        key={`modal-turn-${turnLog.turn}-${index}`}
+                        type="button"
+                        className={activeModalTurnIndex === index ? styles.battleSlotModeActive : ''}
+                        onClick={() => setActiveModalTurnIndex(index)}
+                      >
+                        {turnLog.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className={styles.battleLogBox}>
+                    {(resultTurns[activeModalTurnIndex]?.lines ?? []).map((line, index) => (
+                      <div key={`modal-line-${index}`}>{line}</div>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </section>
+        </div>
       ) : null}
     </div>
   )

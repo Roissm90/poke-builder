@@ -62,7 +62,9 @@ function stripEffectPrefix(raw: string | undefined): string {
   if (!raw) {
     return 'un efecto'
   }
-  return raw.replace(/^(move|ability|item):\s*/, '')
+  const stripped = raw.replace(/^(move|ability|item):\s*/, '')
+  const statusName = STATUS_NAMES[stripped.toLowerCase()]
+  return statusName ? `estar ${statusName}` : stripped
 }
 
 function extractTags(args: string[]): Tags {
