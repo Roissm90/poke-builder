@@ -19,12 +19,19 @@ import {
   OFFICIAL_POKEMON_OPTIONS,
 } from './lib/dexOptions'
 import { parseShowdownTeam, validateShowdownTeamText } from './lib/showdownParser'
-import { getSpriteUrl } from './lib/sprite'
+import { DEFAULT_SPRITE_CLASS, DEFAULT_SPRITE_URL, getSpriteUrl, handleSpriteImgError } from './lib/sprite'
 import BattleTab from './BattleTab'
 
 const styles = new Proxy({} as Record<string, string>, {
   get: (_, property: string | symbol) => String(property),
 }) as Record<string, string>
+
+function Sprite({ src, alt, className }: { src: string | null; alt: string; className?: string }) {
+  const classes = [className, src ? '' : DEFAULT_SPRITE_CLASS].filter(Boolean).join(' ')
+  return (
+    <img src={src ?? DEFAULT_SPRITE_URL} alt={alt} className={classes} onError={handleSpriteImgError} />
+  )
+}
 
 const SHOWDOWN_SESSION_KEY = 'poke-builder-showdown-text'
 
@@ -415,15 +422,11 @@ function App() {
                   </button>
 
                   <div className={styles.spriteWrap}>
-                    {member.spriteUrl || getSpriteUrl(member.species) ? (
-                      <img
-                        src={member.spriteUrl ?? getSpriteUrl(member.species) ?? ''}
-                        alt={member.species || `Pokemon ${memberIndex + 1}`}
-                        className={styles.sprite}
-                      />
-                    ) : (
-                      <span className={styles.spritePlaceholder}>?</span>
-                    )}
+                    <Sprite
+                      src={member.spriteUrl ?? getSpriteUrl(member.species)}
+                      alt={member.species || `Pokemon ${memberIndex + 1}`}
+                      className={styles.sprite}
+                    />
                   </div>
 
                   <h3>{member.species || `Slot ${memberIndex + 1}`}</h3>
@@ -1106,15 +1109,7 @@ function App() {
                               const spriteUrl = getPokemonSprite(team, species)
                               return (
                                 <span key={`def-x4-${row.type}-${species}`} className={styles.pokemonChip}>
-                                  {spriteUrl ? (
-                                    <img
-                                      src={spriteUrl}
-                                      alt={species}
-                                      className={styles.pokemonChipSprite}
-                                    />
-                                  ) : (
-                                    <span className={styles.pokemonChipPlaceholder}>?</span>
-                                  )}
+                                  <Sprite src={spriteUrl} alt={species} className={styles.pokemonChipSprite} />
                                   <span>{species}</span>
                                 </span>
                               )
@@ -1133,15 +1128,7 @@ function App() {
                               const spriteUrl = getPokemonSprite(team, species)
                               return (
                                 <span key={`def-weak-${row.type}-${species}`} className={styles.pokemonChip}>
-                                  {spriteUrl ? (
-                                    <img
-                                      src={spriteUrl}
-                                      alt={species}
-                                      className={styles.pokemonChipSprite}
-                                    />
-                                  ) : (
-                                    <span className={styles.pokemonChipPlaceholder}>?</span>
-                                  )}
+                                  <Sprite src={spriteUrl} alt={species} className={styles.pokemonChipSprite} />
                                   <span>{species}</span>
                                 </span>
                               )
@@ -1160,15 +1147,7 @@ function App() {
                               const spriteUrl = getPokemonSprite(team, species)
                               return (
                                 <span key={`def-res-${row.type}-${species}`} className={styles.pokemonChip}>
-                                  {spriteUrl ? (
-                                    <img
-                                      src={spriteUrl}
-                                      alt={species}
-                                      className={styles.pokemonChipSprite}
-                                    />
-                                  ) : (
-                                    <span className={styles.pokemonChipPlaceholder}>?</span>
-                                  )}
+                                  <Sprite src={spriteUrl} alt={species} className={styles.pokemonChipSprite} />
                                   <span>{species}</span>
                                 </span>
                               )
@@ -1187,15 +1166,7 @@ function App() {
                               const spriteUrl = getPokemonSprite(team, species)
                               return (
                                 <span key={`def-imm-${row.type}-${species}`} className={styles.pokemonChip}>
-                                  {spriteUrl ? (
-                                    <img
-                                      src={spriteUrl}
-                                      alt={species}
-                                      className={styles.pokemonChipSprite}
-                                    />
-                                  ) : (
-                                    <span className={styles.pokemonChipPlaceholder}>?</span>
-                                  )}
+                                  <Sprite src={spriteUrl} alt={species} className={styles.pokemonChipSprite} />
                                   <span>{species}</span>
                                 </span>
                               )
@@ -1281,15 +1252,7 @@ function App() {
                             ▸
                           </span>
                           <span className={styles.pokemonChip}>
-                            {spriteUrl ? (
-                              <img
-                                src={spriteUrl}
-                                alt={entry.pokemon}
-                                className={styles.pokemonChipSprite}
-                              />
-                            ) : (
-                              <span className={styles.pokemonChipPlaceholder}>?</span>
-                            )}
+                            <Sprite src={spriteUrl} alt={entry.pokemon} className={styles.pokemonChipSprite} />
                             <span>{entry.pokemon}</span>
                           </span>
                         </button>
@@ -1305,15 +1268,11 @@ function App() {
                                   <div>
                                     <strong>Pareja:</strong>{' '}
                                     <span className={styles.pokemonChip}>
-                                      {getPokemonSprite(team, row.partner) ? (
-                                        <img
-                                          src={getPokemonSprite(team, row.partner) ?? ''}
-                                          alt={row.partner}
-                                          className={styles.pokemonChipSprite}
-                                        />
-                                      ) : (
-                                        <span className={styles.pokemonChipPlaceholder}>?</span>
-                                      )}
+                                      <Sprite
+                                        src={getPokemonSprite(team, row.partner)}
+                                        alt={row.partner}
+                                        className={styles.pokemonChipSprite}
+                                      />
                                       <span>{row.partner}</span>
                                     </span>
                                   </div>

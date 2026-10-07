@@ -259,6 +259,10 @@ strong {
   width: 24px;
   height: 24px;
   object-fit: contain;
+
+  &.default {
+    filter: blur(8px) contrast(0.5);
+  }
 }
 
 .battleRivalGrid {

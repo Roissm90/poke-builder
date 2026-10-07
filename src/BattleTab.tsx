@@ -24,12 +24,20 @@ import {
 } from './lib/dexOptions'
 import { startInteractiveBattle, type InteractiveBattleHandle } from './lib/interactiveBattle'
 import type { MoveSlot, TeamMember } from './lib/pokemon'
+import { generateRandomRivalTeam } from './lib/randomRivalTeam'
 import { parseShowdownTeam, validateShowdownTeamText } from './lib/showdownParser'
-import { getSpriteUrl } from './lib/sprite'
+import { DEFAULT_SPRITE_CLASS, DEFAULT_SPRITE_URL, getSpriteUrl, handleSpriteImgError } from './lib/sprite'
 
 const styles = new Proxy({} as Record<string, string>, {
   get: (_, property: string | symbol) => String(property),
 }) as Record<string, string>
+
+function Sprite({ src, alt, className }: { src: string | null; alt: string; className?: string }) {
+  const classes = [className, src ? '' : DEFAULT_SPRITE_CLASS].filter(Boolean).join(' ')
+  return (
+    <img src={src ?? DEFAULT_SPRITE_URL} alt={alt} className={classes} onError={handleSpriteImgError} />
+  )
+}
 
 const RIVAL_SESSION_KEY = 'poke-builder-rival-showdown-text'
 const SQUAD_SIZE = 4
@@ -216,11 +224,7 @@ function MiniCard({
     >
       {label ? <span className={styles.battleMiniCardBadge}>{label}</span> : null}
       <div className={styles.spriteWrap}>
-        {sprite ? (
-          <img src={sprite} alt={member.species} className={styles.sprite} />
-        ) : (
-          <span className={styles.spritePlaceholder}>?</span>
-        )}
+        <Sprite src={sprite} alt={member.species} className={styles.sprite} />
       </div>
       <h4>{member.species || 'Sin nombre'}</h4>
       {showDetails ? (
@@ -370,9 +374,11 @@ function ActiveSlotControls({
                             })
                           }
                         >
-                          {foeSprite ? (
-                            <img src={foeSprite} alt={slot?.species ?? ''} className={styles.battleTargetSprite} />
-                          ) : null}
+                          <Sprite
+                            src={foeSprite}
+                            alt={slot?.species ?? ''}
+                            className={styles.battleTargetSprite}
+                          />
                           <span className={styles.battleTargetInfo}>
                             <span className={styles.battleTargetName}>{slot?.species ?? option.label}</span>
                             {slot?.hp ? (
@@ -578,6 +584,18 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
     setRivalTeam([])
     setRivalShowdownText('')
     window.sessionStorage.removeItem(RIVAL_SESSION_KEY)
+    setRivalError('')
+  }
+
+  function generateRandomRival() {
+    if (team.length === 0) {
+      setRivalError('Primero arma tu equipo en la pestaña "Constructor de equipo".')
+      return
+    }
+
+    setRivalShowdownText('')
+    window.sessionStorage.removeItem(RIVAL_SESSION_KEY)
+    setRivalTeam(generateRandomRivalTeam(team))
     setRivalError('')
   }
 
@@ -812,6 +830,9 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
           <button type="button" onClick={addRivalManualMember}>
             Añadir manualmente
           </button>
+          <button type="button" onClick={generateRandomRival} disabled={team.length === 0}>
+            Generar equipo rival aleatorio
+          </button>
         </div>
         {rivalError ? <p className={styles.error}>{rivalError}</p> : null}
 
@@ -828,15 +849,11 @@ export default function BattleTab({ team }: { team: TeamMember[] }) {
                 </button>
 
                 <div className={styles.spriteWrap}>
-                  {member.spriteUrl ?? getSpriteUrl(member.species) ? (
-                    <img
-                      src={member.spriteUrl ?? getSpriteUrl(member.species) ?? ''}
-                      alt={member.species}
-                      className={styles.sprite}
-                    />
-                  ) : (
-                    <span className={styles.spritePlaceholder}>?</span>
-                  )}
+                  <Sprite
+                    src={member.spriteUrl ?? getSpriteUrl(member.species)}
+                    alt={member.species}
+                    className={styles.sprite}
+                  />
                 </div>
 
                 {member.source === 'showdown' ? (
